@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль - Bliz</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .profile-sidebar {
+            background: var(--color-white);
+            border: 1px solid var(--color-border-color);
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+        }
+
+        .profile-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .profile-menu-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.4rem;
+            color: var(--color-dark-gray);
+            font-weight: 500;
+        }
+
+        .profile-menu-item:hover {
+            background: var(--color-light-gray2);
+        }
+
+        .profile-menu-item.active {
+            background: var(--color-green);
+            color: var(--color-white);
+        }
+
+        .profile-content {
+            background: var(--color-white);
+            border: 1px solid var(--color-border-color);
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .profile-section {
+            display: none;
+        }
+
+        .profile-section.active {
+            display: block;
+        }
+
+        .order-card {
+            border: 1px solid var(--color-border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: box-shadow 0.3s;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--color-border-color);
+        }
+
+        .order-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .order-date {
+            color: var(--color-dark-gray);
+            font-size: 1.4rem;
+        }
+
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .order-status.processing {
+            background: #fff4e6;
+            color: #e67e22;
+        }
+
+        .order-status.shipping {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .order-status.delivered {
+            background: var(--color-light-green2);
+            color: var(--color-green);
+        }
+
+        .delivery-tracker {
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .delivery-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .delivery-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--color-light-gray);
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .delivery-step.completed .step-icon {
+            background: var(--color-green);
+            color: var(--color-white);
+        }
+
+        .delivery-step.active .step-icon {
+            background: var(--color-orange);
+            color: var(--color-white);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .step-line {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            right: -50%;
+            height: 3px;
+            background: var(--color-light-gray);
+            z-index: 1;
+        }
+
+        .delivery-step.completed .step-line {
+            background: var(--color-green);
+        }
+
+        .delivery-step:last-child .step-line {
+            display: none;
+        }
+
+        .step-label {
+            font-size: 1.2rem;
+            color: var(--color-dark-gray);
+            font-weight: 500;
+        }
+
+        .delivery-step.completed .step-label,
+        .delivery-step.active .step-label {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        .delivery-info {
+            background: var(--color-light-gray2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .delivery-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1.4rem;
+        }
+
+        .delivery-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pickup-option {
+            border: 2px solid var(--color-border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pickup-option:hover {
+            border-color: var(--color-green);
+            background: var(--color-very-light-green);
+        }
+
+        .pickup-option.selected {
+            border-color: var(--color-green);
+            background: var(--color-very-light-green);
+        }
+
+        .pickup-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .pickup-address {
+            color: var(--color-dark-gray);
+            font-size: 1.4rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+
+            .delivery-steps {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .step-line {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="head-bt-cnt">
+                <a href="/" class="logo" style="font-size: 3.6rem; font-weight: 800; color: var(--color-green); text-decoration: none;">Bliz</a>
+                <a href="/catalog.html" class="head-bt-cnt__catalog-btn">Каталог</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-container">
+            <aside class="profile-sidebar">
+                <h2 style="margin-bottom: 2.4rem; font-size: 2rem;">Мій профіль</h2>
+                <div class="profile-menu">
+                    <div class="profile-menu-item active" data-section="orders">Мої замовлення</div>
+                    <div class="profile-menu-item" data-section="personal">Особисті дані</div>
+                    <div class="profile-menu-item" data-section="wishlist">Обране</div>
+                    <div class="profile-menu-item" data-section="addresses">Адреси доставки</div>
+                </div>
+            </aside>
+
+            <div class="profile-content">
+                <div id="orders" class="profile-section active">
+                    <h1 style="font-size: 2.8rem; margin-bottom: 2.4rem;">Мої замовлення</h1>
+
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-number">Замовлення #12345</div>
+                                <div class="order-date">13 червня 2026</div>
+                            </div>
+                            <div class="order-status shipping">В дорозі</div>
+                        </div>
+
+                        <div class="delivery-tracker">
+                            <div class="delivery-steps">
+                                <div class="delivery-step completed">
+                                    <div class="step-icon">✓</div>
+                                    <div class="step-label">Оформлено</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="delivery-step completed">
+                                    <div class="step-icon">📦</div>
+                                    <div class="step-label">Зібрано</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="delivery-step active">
+                                    <div class="step-icon">🚚</div>
+                                    <div class="step-label">В дорозі</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="delivery-step">
+                                    <div class="step-icon">🏪</div>
+                                    <div class="step-label">У відділенні</div>
+                                    <div class="step-line"></div>
+                                </div>
+                                <div class="delivery-step">
+                                    <div class="step-icon">✓</div>
+                                    <div class="step-label">Отримано</div>
+                                </div>
+                            </div>
+
+                            <div class="delivery-info">
+                                <div class="delivery-info-item">
+                                    <span><strong>Спосіб доставки:</strong></span>
+                                    <span>Нова Пошта</span>
+                                </div>
+                                <div class="delivery-info-item">
+                                    <span><strong>Відділення:</strong></span>
+                                    <span>№54 (вул. Хрещатик, 22)</span>
+                                </div>
+                                <div class="delivery-info-item">
+                                    <span><strong>ТТН:</strong></span>
+                                    <span>59000123456789</span>
+                                </div>
+                                <div class="delivery-info-item">
+                                    <span><strong>Очікувана дата:</strong></span>
+                                    <span>14 червня 2026</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 2.4rem; padding-top: 1.6rem; border-top: 1px solid var(--color-border-color);">
+                            <strong style="font-size: 1.8rem;">Сума: 54 999 ₴</strong>
+                        </div>
+                    </div>
+
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-number">Замовлення #12344</div>
+                                <div class="order-date">10 червня 2026</div>
+                            </div>
+                            <div class="order-status delivered">Отримано</div>
+                        </div>
+
+                        <div style="padding: 1.6rem; background: var(--color-light-green2); border-radius: 8px;">
+                            <p style="font-size: 1.4rem; color: var(--color-green); font-weight: 600;">
+                                ✓ Замовлення отримано 11 червня 2026
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 1.6rem;">
+                            <strong style="font-size: 1.8rem;">Сума: 12 999 ₴</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="personal" class="profile-section">
+                    <h1 style="font-size: 2.8rem; margin-bottom: 2.4rem;">Особисті дані</h1>
+                    <div style="max-width: 50rem;">
+                        <div class="form-group" style="margin-bottom: 1.6rem;">
+                            <label style="display: block; margin-bottom: 0.6rem; font-weight: 500; font-size: 1.4rem;">Ім'я</label>
+                            <input type="text" value="Іван Петренко" style="width: 100%; padding: 1.2rem; border: 1px solid var(--color-border-color); border-radius: 0.8rem; font-size: 1.4rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.6rem;">
+                            <label style="display: block; margin-bottom: 0.6rem; font-weight: 500; font-size: 1.4rem;">Email</label>
+                            <input type="email" value="ivan@example.com" style="width: 100%; padding: 1.2rem; border: 1px solid var(--color-border-color); border-radius: 0.8rem; font-size: 1.4rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.6rem;">
+                            <label style="display: block; margin-bottom: 0.6rem; font-weight: 500; font-size: 1.4rem;">Телефон</label>
+                            <input type="tel" value="+380 50 123 4567" style="width: 100%; padding: 1.2rem; border: 1px solid var(--color-border-color); border-radius: 0.8rem; font-size: 1.4rem;">
+                        </div>
+                        <button style="background: var(--color-green); color: white; border: none; padding: 1.4rem 3.2rem; border-radius: 0.8rem; font-size: 1.6rem; font-weight: 600; cursor: pointer;">
+                            Зберегти зміни
+                        </button>
+                    </div>
+                </div>
+
+                <div id="addresses" class="profile-section">
+                    <h1 style="font-size: 2.8rem; margin-bottom: 2.4rem;">Адреси доставки</h1>
+
+                    <div class="pickup-option selected">
+                        <div class="pickup-title">📦 Відділення Нової Пошти</div>
+                        <div class="pickup-address">№54 - вул. Хрещатик, 22, Київ</div>
+                    </div>
+
+                    <div class="pickup-option">
+                        <div class="pickup-title">🏪 Самовивіз з магазину</div>
+                        <div class="pickup-address">ТРЦ "Ocean Plaza" - вул. Антоновича, 176, Київ</div>
+                    </div>
+
+                    <div class="pickup-option">
+                        <div class="pickup-title">🚚 Кур'єрська доставка</div>
+                        <div class="pickup-address">вул. Шевченка, 15, кв. 42, Київ</div>
+                    </div>
+
+                    <button style="background: var(--color-green); color: white; border: none; padding: 1.4rem 3.2rem; border-radius: 0.8rem; font-size: 1.6rem; font-weight: 600; cursor: pointer; margin-top: 1.6rem;">
+                        + Додати адресу
+                    </button>
+                </div>
+
+                <div id="wishlist" class="profile-section">
+                    <h1 style="font-size: 2.8rem; margin-bottom: 2.4rem;">Обране</h1>
+                    <div class="products-grid" id="wishlistProducts"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.profile-menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.profile-menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(item.dataset.section).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
