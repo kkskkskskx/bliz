@@ -1,9 +1,9 @@
 <?php
-define('DB_HOST', 'yamanote.proxy.rlwy.net');
-define('DB_PORT', '53043');
-define('DB_NAME', 'railway');
-define('DB_USER', 'root');
-define('DB_PASS', 'FlVjUIfFPYEkfNECrVeQUHvdJQiwGQDo');
+define('DB_HOST', getenv('MYSQLHOST') ?: 'yamanote.proxy.rlwy.net');
+define('DB_PORT', getenv('MYSQLPORT') ?: '53043');
+define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'railway');
+define('DB_USER', getenv('MYSQLUSER') ?: 'root');
+define('DB_PASS', getenv('MYSQLPASSWORD') ?: 'FlVjUIfFPYEkfNECrVeQUHvdJQiwGQDo');
 
 function getDBConnection() {
     try {
