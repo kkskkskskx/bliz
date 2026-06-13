@@ -177,38 +177,278 @@ async function loadProducts() {
         const productsContainer = document.getElementById('productsGrid');
 
         if (productsContainer && result.products) {
-            productsContainer.innerHTML = result.products.map(product => `
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="${product.image || '/assets/images/placeholder.jpg'}" alt="${product.name}">
-                        <div class="product-actions">
-                            <button class="action-btn wishlist-btn" onclick="toggleWishlist(${product.id})">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                            </button>
-                        </div>
+            productsContainer.innerHTML = result.products.map(product => {
+                const hasDiscount = product.old_price && product.old_price > product.price;
+                const discountPercent = hasDiscount ? Math.round((1 - product.price / product.old_price) * 100) : 0;
+
+                return `
+                <div class="product-tile">
+                    ${product.labels ? `
+                    <div class="product-tile-hot-labels">
+                        ${product.labels.includes('new') ? '<span class="label new">Новинка</span>' : ''}
+                        ${product.labels.includes('hit') ? '<span class="label hit">Хіт</span>' : ''}
+                        ${product.labels.includes('sale') ? '<span class="label">Акція</span>' : ''}
                     </div>
-                    <div class="product-info">
-                        <div class="product-rating">
-                            <span class="stars">${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}</span>
-                            <span class="reviews">(${product.reviews_count})</span>
-                        </div>
-                        <h3 class="product-name">${product.name}</h3>
-                        <div class="product-price">
-                            ${product.old_price ? `<span class="old-price">${product.old_price} ₴</span>` : ''}
-                            <span class="current-price">${product.price} ₴</span>
-                        </div>
-                        ${product.bonus_points ? `<div class="bonus-points">+${product.bonus_points} ₴ на бонусний рахунок</div>` : ''}
-                        <button class="add-to-cart-btn" onclick="handleAddToCart(${product.id})">
-                            До кошика
+                    ` : ''}
+
+                    <div class="product-tile-actions">
+                        <button class="product-tile-actions__item" onclick="toggleWishlist(${product.id})" title="Додати до обраного">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                        <button class="product-tile-actions__item" onclick="compareProduct(${product.id})" title="Додати до порівняння">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 2v6m6-6v6M4 10h16M6 22h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"></path>
+                            </svg>
                         </button>
                     </div>
+
+                    <a href="/product.html?id=${product.id}" class="product-tile-media">
+                        <img src="${product.image || '/assets/images/placeholder.jpg'}"
+                             alt="${product.name}"
+                             class="product-tile-media__img">
+                    </a>
+
+                    ${product.rating ? `
+                    <div class="rating-number-box">
+                        <div class="rating-stars">${'★'.repeat(Math.floor(product.rating || 0))}${'☆'.repeat(5 - Math.floor(product.rating || 0))}</div>
+                        <span>${product.reviews_count || 0}</span>
+                    </div>
+                    ` : ''}
+
+                    <div class="product-tile-title">
+                        <a href="/product.html?id=${product.id}" class="product-tile-title__name">
+                            ${product.name}
+                        </a>
+                    </div>
+
+                    <div class="product-tile-price">
+                        <div class="product-tile-price__row">
+                            <span class="product-tile-price__current ${hasDiscount ? 'product-tile-price__current--accent' : ''}">
+                                ${Math.floor(product.price)}
+                            </span>
+                            <span class="product-tile-price__currency">₴</span>
+                            ${hasDiscount ? `<span class="product-tile-price__discount">-${discountPercent}%</span>` : ''}
+                        </div>
+                        ${hasDiscount ? `<span class="product-tile-price__old">${Math.floor(product.old_price)} ₴</span>` : ''}
+                    </div>
+
+                    ${product.credit_monthly ? `
+                    <div class="credit-monthly-min">
+                        <span>від </span>
+                        <span class="credit-monthly-min__amount">${Math.floor(product.credit_monthly)} ₴</span>
+                        <span> / міс</span>
+                    </div>
+                    ` : ''}
+
+                    ${product.bonus_points ? `
+                    <div class="bonus-label">
+                        <span class="bonus-label__icon">B</span>
+                        <span>+<span class="bonus-label-value">${product.bonus_points}</span> на бонусний рахунок</span>
+                    </div>
+                    ` : ''}
+
+                    <button class="buy-btn" onclick="handleAddToCart(${product.id})">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        До кошика
+                    </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
     } catch (error) {
         console.error('Failed to load products:', error);
+        // Load demo products if API fails
+        loadDemoProducts();
+    }
+}
+
+function loadDemoProducts() {
+    const demoProducts = [
+        {
+            id: 1,
+            name: 'iPhone 15 Pro Max 256GB',
+            price: 54999,
+            old_price: 59999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=iPhone+15',
+            rating: 4.8,
+            reviews_count: 342,
+            bonus_points: 550,
+            credit_monthly: 2292,
+            labels: ['hit', 'new']
+        },
+        {
+            id: 2,
+            name: 'Samsung Galaxy S24 Ultra 512GB',
+            price: 49999,
+            old_price: 54999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=Samsung+S24',
+            rating: 4.7,
+            reviews_count: 218,
+            bonus_points: 500,
+            credit_monthly: 2083,
+            labels: ['new']
+        },
+        {
+            id: 3,
+            name: 'MacBook Air M3 13" 16GB 512GB',
+            price: 59999,
+            old_price: null,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=MacBook+Air',
+            rating: 4.9,
+            reviews_count: 156,
+            bonus_points: 600,
+            credit_monthly: 2500,
+            labels: ['hit']
+        },
+        {
+            id: 4,
+            name: 'Sony PlayStation 5 Slim + Доп. джойстик',
+            price: 19999,
+            old_price: 22999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=PS5',
+            rating: 4.6,
+            reviews_count: 423,
+            bonus_points: 200,
+            credit_monthly: 833,
+            labels: ['sale']
+        },
+        {
+            id: 5,
+            name: 'iPad Pro 12.9" M2 256GB Wi-Fi',
+            price: 44999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=iPad+Pro',
+            rating: 4.8,
+            reviews_count: 189,
+            bonus_points: 450,
+            credit_monthly: 1875,
+            labels: ['new']
+        },
+        {
+            id: 6,
+            name: 'Apple Watch Series 9 GPS 45mm',
+            price: 16999,
+            old_price: 18999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=Apple+Watch',
+            rating: 4.7,
+            reviews_count: 267,
+            bonus_points: 170,
+            credit_monthly: 708
+        },
+        {
+            id: 7,
+            name: 'AirPods Pro 2 USB-C',
+            price: 9999,
+            old_price: 10999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=AirPods+Pro',
+            rating: 4.9,
+            reviews_count: 512,
+            bonus_points: 100,
+            credit_monthly: 417,
+            labels: ['hit']
+        },
+        {
+            id: 8,
+            name: 'Dyson V15 Detect Absolute',
+            price: 24999,
+            old_price: 27999,
+            image: 'https://via.placeholder.com/300x300/f8f8f8/2abd13?text=Dyson',
+            rating: 4.8,
+            reviews_count: 145,
+            bonus_points: 250,
+            credit_monthly: 1042,
+            labels: ['sale']
+        }
+    ];
+
+    const productsContainer = document.getElementById('productsGrid');
+    if (productsContainer) {
+        productsContainer.innerHTML = demoProducts.map(product => {
+            const hasDiscount = product.old_price && product.old_price > product.price;
+            const discountPercent = hasDiscount ? Math.round((1 - product.price / product.old_price) * 100) : 0;
+
+            return `
+            <div class="product-tile">
+                ${product.labels ? `
+                <div class="product-tile-hot-labels">
+                    ${product.labels.includes('new') ? '<span class="label new">Новинка</span>' : ''}
+                    ${product.labels.includes('hit') ? '<span class="label hit">Хіт</span>' : ''}
+                    ${product.labels.includes('sale') ? '<span class="label">Акція</span>' : ''}
+                </div>
+                ` : ''}
+
+                <div class="product-tile-actions">
+                    <button class="product-tile-actions__item" onclick="toggleWishlist(${product.id})" title="Додати до обраного">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
+                    <button class="product-tile-actions__item" onclick="compareProduct(${product.id})" title="Додати до порівняння">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 2v6m6-6v6M4 10h16M6 22h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <a href="/product.html?id=${product.id}" class="product-tile-media">
+                    <img src="${product.image}"
+                         alt="${product.name}"
+                         class="product-tile-media__img">
+                </a>
+
+                ${product.rating ? `
+                <div class="rating-number-box">
+                    <div class="rating-stars">${'★'.repeat(Math.floor(product.rating || 0))}${'☆'.repeat(5 - Math.floor(product.rating || 0))}</div>
+                    <span>${product.reviews_count || 0}</span>
+                </div>
+                ` : ''}
+
+                <div class="product-tile-title">
+                    <a href="/product.html?id=${product.id}" class="product-tile-title__name">
+                        ${product.name}
+                    </a>
+                </div>
+
+                <div class="product-tile-price">
+                    <div class="product-tile-price__row">
+                        <span class="product-tile-price__current ${hasDiscount ? 'product-tile-price__current--accent' : ''}">
+                            ${Math.floor(product.price)}
+                        </span>
+                        <span class="product-tile-price__currency">₴</span>
+                        ${hasDiscount ? `<span class="product-tile-price__discount">-${discountPercent}%</span>` : ''}
+                    </div>
+                    ${hasDiscount ? `<span class="product-tile-price__old">${Math.floor(product.old_price)} ₴</span>` : ''}
+                </div>
+
+                ${product.credit_monthly ? `
+                <div class="credit-monthly-min">
+                    <span>від </span>
+                    <span class="credit-monthly-min__amount">${Math.floor(product.credit_monthly)} ₴</span>
+                    <span> / міс</span>
+                </div>
+                ` : ''}
+
+                ${product.bonus_points ? `
+                <div class="bonus-label">
+                    <span class="bonus-label__icon">B</span>
+                    <span>+<span class="bonus-label-value">${product.bonus_points}</span> на бонусний рахунок</span>
+                </div>
+                ` : ''}
+
+                <button class="buy-btn" onclick="handleAddToCart(${product.id})">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    До кошика
+                </button>
+            </div>
+        `}).join('');
     }
 }
 
@@ -243,6 +483,10 @@ async function updateCartCount() {
 
 function toggleWishlist(productId) {
     showNotification('Додано до обраного!');
+}
+
+function compareProduct(productId) {
+    showNotification('Додано до порівняння!');
 }
 
 function debounce(func, wait) {
