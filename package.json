@@ -1,9 +1,0 @@
-{
-  "name": "bliz",
-  "version": "1.0.0",
-  "description": "Bliz E-commerce Website",
-  "main": "index.html",
-  "scripts": {
-    "start": "php -S 0.0.0.0:$PORT"
-  }
-}
