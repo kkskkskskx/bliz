@@ -195,21 +195,47 @@
     </div>
 
     <div id="registerModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px;">
             <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
             <h2>Реєстрація</h2>
             <form id="registerForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label for="registerLastName">Прізвище</label>
+                        <input type="text" id="registerLastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerFirstName">Ім'я</label>
+                        <input type="text" id="registerFirstName" required>
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label for="registerName">Ім'я</label>
-                    <input type="text" id="registerName" required>
+                    <label for="registerPatronymic">По батькові</label>
+                    <input type="text" id="registerPatronymic">
+                </div>
+                <div class="form-group">
+                    <label for="registerPhone">Номер телефону</label>
+                    <input type="tel" id="registerPhone" placeholder="+38 (0__) ___ __ __" required>
                 </div>
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
                     <input type="email" id="registerEmail" required>
                 </div>
                 <div class="form-group">
-                    <label for="registerPhone">Телефон</label>
-                    <input type="tel" id="registerPhone">
+                    <label for="registerGender">Стать</label>
+                    <select id="registerGender">
+                        <option value="not_specified">Не вказувати</option>
+                        <option value="male">Чоловік</option>
+                        <option value="female">Жінка</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="registerBirthDate">Дата народження</label>
+                    <input type="date" id="registerBirthDate">
+                </div>
+                <div class="form-group">
+                    <label for="registerAddress">Адреса доставки</label>
+                    <textarea id="registerAddress" rows="2" placeholder="вул. Хрещатик, 22, кв. 15, Київ"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Пароль</label>

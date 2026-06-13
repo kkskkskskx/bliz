@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true);
 
-if (!isset($data['email']) || !isset($data['password']) || !isset($data['name'])) {
+if (!isset($data['email']) || !isset($data['password']) || !isset($data['first_name']) || !isset($data['last_name']) || !isset($data['phone'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing required fields']);
     exit;
@@ -22,8 +22,14 @@ if (!isset($data['email']) || !isset($data['password']) || !isset($data['name'])
 
 $email = filter_var($data['email'], FILTER_VALIDATE_EMAIL);
 $password = $data['password'];
-$name = trim($data['name']);
-$phone = isset($data['phone']) ? trim($data['phone']) : null;
+$firstName = trim($data['first_name']);
+$lastName = trim($data['last_name']);
+$patronymic = isset($data['patronymic']) ? trim($data['patronymic']) : null;
+$phone = trim($data['phone']);
+$gender = isset($data['gender']) ? $data['gender'] : 'not_specified';
+$birthDate = isset($data['birth_date']) ? $data['birth_date'] : null;
+$deliveryAddress = isset($data['delivery_address']) ? trim($data['delivery_address']) : null;
+$name = "$lastName $firstName";
 
 if (!$email) {
     http_response_code(400);
@@ -51,8 +57,8 @@ try {
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    $stmt = $pdo->prepare("INSERT INTO users (email, password, name, phone) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$email, $hashedPassword, $name, $phone]);
+    $stmt = $pdo->prepare("INSERT INTO users (email, password, name, first_name, last_name, patronymic, phone, gender, birth_date, delivery_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$email, $hashedPassword, $name, $firstName, $lastName, $patronymic, $phone, $gender, $birthDate, $deliveryAddress]);
 
     $userId = $pdo->lastInsertId();
 

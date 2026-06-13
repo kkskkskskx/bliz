@@ -127,18 +127,37 @@ document.addEventListener('DOMContentLoaded', () => {
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const name = document.getElementById('registerName').value;
-            const phone = document.getElementById('registerPhone').value;
+
+            const formData = {
+                email: document.getElementById('registerEmail').value,
+                password: document.getElementById('registerPassword').value,
+                first_name: document.getElementById('registerFirstName').value,
+                last_name: document.getElementById('registerLastName').value,
+                patronymic: document.getElementById('registerPatronymic').value,
+                phone: document.getElementById('registerPhone').value,
+                gender: document.getElementById('registerGender').value,
+                birth_date: document.getElementById('registerBirthDate').value,
+                delivery_address: document.getElementById('registerAddress').value
+            };
 
             try {
-                const result = await register(email, password, name, phone);
-                showNotification('Реєстрація успішна!');
-                closeModal('registerModal');
-                setTimeout(() => location.reload(), 1000);
+                const response = await fetch('/api/register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Реєстрація успішна!');
+                    closeModal('registerModal');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification(result.error || 'Помилка реєстрації', 'error');
+                }
             } catch (error) {
-                showNotification(error.message || 'Помилка реєстрації', 'error');
+                showNotification('Помилка реєстрації', 'error');
             }
         });
     }
