@@ -146,8 +146,104 @@ async function loadCategories() {
     }
 }
 
-function openAddProductModal() {
-    alert('Функція додавання товару в розробці');
+async function openAddProductModal() {
+    const categories = await fetch('/api/categories.php').then(r => r.json());
+
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.id = 'addProductModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeModal('addProductModal')">&times;</button>
+            <h2>Додати товар</h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label>Назва товару</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Категорія</label>
+                    <select name="category_id" required>
+                        ${categories.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Опис</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Ціна (₴)</label>
+                        <input type="number" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Стара ціна (₴)</label>
+                        <input type="number" name="old_price">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL зображення</label>
+                    <input type="text" name="image" placeholder="/assets/images/product.jpg">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Рейтинг</label>
+                        <input type="number" name="rating" step="0.1" min="0" max="5" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Відгуків</label>
+                        <input type="number" name="reviews_count" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Бонуси (₴)</label>
+                        <input type="number" name="bonus_points" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="in_stock" checked>
+                        В наявності
+                    </label>
+                </div>
+                <button type="submit" class="submit-btn">Додати товар</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        data.in_stock = formData.get('in_stock') === 'on';
+
+        try {
+            const response = await fetch('/api/admin/products.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Товар додано успішно!');
+                closeModal('addProductModal');
+                loadProducts();
+                loadDashboardStats();
+            } else {
+                alert('Помилка: ' + result.error);
+            }
+        } catch (error) {
+            alert('Помилка при додаванні товару');
+        }
+    });
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.remove();
 }
 
 function editProduct(id) {
