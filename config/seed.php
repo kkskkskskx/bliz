@@ -3,7 +3,13 @@ require_once '../config/database.php';
 
 $pdo = getDBConnection();
 
-$pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE");
+try {
+    $pdo->exec("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT FALSE");
+} catch(PDOException $e) {
+    if ($e->getCode() != '42S21') {
+        throw $e;
+    }
+}
 
 $categories = [
     ['name' => 'Смартфони', 'slug' => 'smartphones', 'icon' => '📱'],
