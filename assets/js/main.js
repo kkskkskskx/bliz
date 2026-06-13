@@ -143,7 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
+    }
+
     loadProducts();
+    updateCartCount();
 });
 
 async function loadProducts() {
@@ -218,4 +224,34 @@ async function updateCartCount() {
 
 function toggleWishlist(productId) {
     showNotification('Додано до обраного!');
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+async function handleSearch(e) {
+    const query = e.target.value.trim();
+
+    if (query.length < 2) {
+        return;
+    }
+
+    try {
+        const result = await getProducts({ search: query, limit: 10 });
+
+        if (result.products && result.products.length > 0) {
+            window.location.href = `/catalog.html?search=${encodeURIComponent(query)}`;
+        }
+    } catch (error) {
+        console.error('Search failed:', error);
+    }
 }
